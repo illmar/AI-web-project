@@ -1075,8 +1075,8 @@
         <div class="slide-overlay"></div>
         <canvas class="matrix-canvas"></canvas>
         <div class="slide-content">
-          <p class="slide-mini-heading">Postavte něco úžasného</p>
-          <h1 class="slide-main-heading">Začněte s námi zdarma</h1>
+          <p class="slide-mini-heading">Inovace bez hranic</p>
+          <h1 class="slide-main-heading">Váš nápad. Naše technologie.</h1>
         </div>
       </div>
 
@@ -1085,8 +1085,8 @@
         <div class="slide-overlay"></div>
         <canvas class="matrix-canvas"></canvas>
         <div class="slide-content">
-          <p class="slide-mini-heading">Postavte něco úžasného</p>
-          <h1 class="slide-main-heading">Začněte s námi zdarma</h1>
+          <p class="slide-mini-heading">Budoucnost je tady</p>
+          <h1 class="slide-main-heading">Připojte se k tisícům spokojených uživatelů</h1>
         </div>
       </div>
 
@@ -1501,7 +1501,7 @@
       function render() {
         canvases.forEach(function (canvas) {
           var ctx = canvas.getContext('2d');
-          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillStyle = 'rgba(0,0,0,0.03)';
           ctx.fillRect(0, 0, width, height);
           ctx.font = fontSize + 'px monospace';
 
@@ -1527,14 +1527,20 @@
         });
       }
 
-      function loop() {
-        update();
-        render();
+      var lastTime = 0;
+      var interval = 100;
+
+      function loop(timestamp) {
+        if (timestamp - lastTime >= interval) {
+          lastTime = timestamp;
+          update();
+          render();
+        }
         requestAnimationFrame(loop);
       }
 
       init();
-      loop();
+      requestAnimationFrame(loop);
 
       var resizeTimer;
       window.addEventListener('resize', function () {
