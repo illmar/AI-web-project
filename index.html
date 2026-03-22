@@ -229,6 +229,17 @@
       );
     }
 
+    .matrix-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
     .slide-content {
       position: absolute;
       inset: 0;
@@ -1050,6 +1061,7 @@
       <!-- Slide 1 -->
       <div class="slide slide-1">
         <div class="slide-overlay"></div>
+        <canvas class="matrix-canvas"></canvas>
         <div class="slide-content">
           <p class="slide-mini-heading">Postavte něco úžasného</p>
           <h1 class="slide-main-heading">Začněte s námi zdarma</h1>
@@ -1059,6 +1071,7 @@
       <!-- Slide 2 -->
       <div class="slide slide-2">
         <div class="slide-overlay"></div>
+        <canvas class="matrix-canvas"></canvas>
         <div class="slide-content">
           <p class="slide-mini-heading">Postavte něco úžasného</p>
           <h1 class="slide-main-heading">Začněte s námi zdarma</h1>
@@ -1068,6 +1081,7 @@
       <!-- Slide 3 -->
       <div class="slide slide-3">
         <div class="slide-overlay"></div>
+        <canvas class="matrix-canvas"></canvas>
         <div class="slide-content">
           <p class="slide-mini-heading">Postavte něco úžasného</p>
           <h1 class="slide-main-heading">Začněte s námi zdarma</h1>
@@ -1434,6 +1448,97 @@
       });
 
       startAuto();
+    })();
+
+    // ─── Matrix Rain Effect ───
+    (function () {
+      const canvases = document.querySelectorAll('.matrix-canvas');
+      if (!canvases.length) return;
+
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' +
+        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+      const fontSize = 16;
+      const trailLength = 22;
+
+      let width, height, columns, drops, trailChars;
+
+      function randomChar() {
+        return chars[Math.floor(Math.random() * chars.length)];
+      }
+
+      function init() {
+        const hero = document.getElementById('hero');
+        width = hero.offsetWidth;
+        height = hero.offsetHeight;
+
+        canvases.forEach(function (canvas) {
+          canvas.width = width;
+          canvas.height = height;
+        });
+
+        columns = Math.floor(width / fontSize);
+        drops = Array.from({ length: columns }, function () {
+          return Math.floor(Math.random() * -(height / fontSize));
+        });
+        trailChars = Array.from({ length: columns }, function () {
+          return Array.from({ length: trailLength }, randomChar);
+        });
+      }
+
+      function update() {
+        for (var i = 0; i < columns; i++) {
+          drops[i]++;
+          if (Math.random() > 0.88) {
+            trailChars[i][Math.floor(Math.random() * trailLength)] = randomChar();
+          }
+          if (drops[i] * fontSize > height + trailLength * fontSize && Math.random() > 0.95) {
+            drops[i] = -Math.floor(Math.random() * 20);
+          }
+        }
+      }
+
+      function render() {
+        canvases.forEach(function (canvas) {
+          var ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, width, height);
+          ctx.font = fontSize + 'px monospace';
+
+          for (var i = 0; i < columns; i++) {
+            var headY = drops[i];
+            for (var t = 0; t < trailLength; t++) {
+              var charY = headY - t;
+              if (charY < 0 || charY * fontSize > height) continue;
+              var progress = t / trailLength;
+              var alpha;
+              if (t === 0) {
+                ctx.fillStyle = '#ff69b4';
+              } else if (t < 6) {
+                alpha = (1 - progress * 0.7).toFixed(2);
+                ctx.fillStyle = 'rgba(255,182,193,' + alpha + ')';
+              } else {
+                alpha = Math.max(0, 1 - progress * 1.4).toFixed(2);
+                ctx.fillStyle = 'rgba(231,84,128,' + alpha + ')';
+              }
+              ctx.fillText(trailChars[i][t], i * fontSize, charY * fontSize);
+            }
+          }
+        });
+      }
+
+      function loop() {
+        update();
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      init();
+      loop();
+
+      var resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(init, 200);
+      }, { passive: true });
     })();
 
     // Nav scroll effect
