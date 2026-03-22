@@ -205,20 +205,29 @@
       height: 100%;
       position: relative;
       flex-shrink: 0;
+      isolation: isolate;
+    }
+
+    .slide-1::before, .slide-2::before, .slide-3::before {
+      content: '';
+      position: absolute;
+      inset: 0;
       background-size: cover;
       background-position: center;
+      filter: contrast(1.1) brightness(0.75) saturate(0.8);
+      z-index: -1;
     }
 
-    .slide-1 {
-      background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80');
+    .slide-1::before {
+      background-image: url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1600&q=80');
     }
 
-    .slide-2 {
-      background-image: url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&q=80');
+    .slide-2::before {
+      background-image: url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&q=80');
     }
 
-    .slide-3 {
-      background-image: url('https://images.unsplash.com/photo-1551434678-e076c223a692?w=1600&q=80');
+    .slide-3::before {
+      background-image: url('https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=1600&q=80');
     }
 
     .slide-overlay {
@@ -226,8 +235,8 @@
       inset: 0;
       background: linear-gradient(
         135deg,
-        rgba(0, 143, 17, 0.65) 0%,
-        rgba(0, 10, 2, 0.75) 100%
+        rgba(0, 143, 17, 0.35) 0%,
+        rgba(0, 10, 2, 0.45) 100%
       );
     }
 
@@ -239,7 +248,7 @@
       height: 100%;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.85;
+      opacity: 0.65;
     }
 
     .slide-content {
@@ -1461,7 +1470,7 @@
       const fontSize = 12;
       const trailLength = 28;
 
-      let width, height, columns, drops, trailChars;
+      let width, height, columns, drops, trailChars, startDelays, frameCount;
 
       function randomChar() {
         return chars[Math.floor(Math.random() * chars.length)];
@@ -1478,8 +1487,12 @@
         });
 
         columns = Math.floor(width / fontSize);
+        frameCount = 0;
         drops = Array.from({ length: columns }, function () {
-          return Math.floor(Math.random() * -(height / fontSize));
+          return 0;
+        });
+        startDelays = Array.from({ length: columns }, function () {
+          return Math.floor(Math.random() * 30); // 0–30 ticks = 0–3 s at 100 ms/tick
         });
         trailChars = Array.from({ length: columns }, function () {
           return Array.from({ length: trailLength }, randomChar);
@@ -1487,7 +1500,9 @@
       }
 
       function update() {
+        frameCount++;
         for (var i = 0; i < columns; i++) {
+          if (frameCount < startDelays[i]) continue;
           drops[i]++;
           if (Math.random() > 0.88) {
             trailChars[i][Math.floor(Math.random() * trailLength)] = randomChar();
@@ -1501,11 +1516,12 @@
       function render() {
         canvases.forEach(function (canvas) {
           var ctx = canvas.getContext('2d');
-          ctx.fillStyle = 'rgba(0,0,0,0.03)';
+          ctx.fillStyle = 'rgba(0,0,0,0.15)';
           ctx.fillRect(0, 0, width, height);
           ctx.font = fontSize + 'px monospace';
 
           for (var i = 0; i < columns; i++) {
+            if (frameCount < startDelays[i]) continue;
             var headY = drops[i];
             for (var t = 0; t < trailLength; t++) {
               var charY = headY - t;
